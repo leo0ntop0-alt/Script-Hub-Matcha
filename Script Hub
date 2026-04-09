@@ -1,1 +1,352 @@
+Dont Not Copy This script
 
+--[[
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣼⣿⣿⣿⣿⣿⣿⣿⣿⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⣦⣄⢀⣼⣿⣿⣿⣿⣿⠿⠛⠋⠉⠁⠀⠀⠉⠉⠛⠻⢿⣿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣤⣤⣤⣤⣤⣶⣿⣿⣿⡿⠛⢻⣾⣿⣿⣿⠟⢋⣤⠾⠛⠛⠛⠛⠓⠄⠀⠀⠀⠀⠀⢉⡛⠿⣷⣶⠤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⡟⠁⠀⢀⣾⣿⣿⠟⠁⠀⠉⣀⣤⣤⠀⢀⣤⣶⣿⣿⣿⣿⣷⣦⡀⠈⠙⠲⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⠏⠀⡀⠀⣸⣿⣿⠋⠀⣠⣶⣿⣿⠟⠁⣴⣿⣿⣿⠟⣉⣤⣤⣤⡉⠛⠆⠀⠀⠀⠙⢿⣿⣷⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿⣿⣿⣿⡟⠀⣼⠇⢀⣿⣿⡇⠀⢰⣿⣿⣿⠃⠀⢰⣿⣿⣿⣡⣾⣿⡿⠿⣿⣿⡆⠀⠀⢰⡄⠀⠀⠙⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⡇⢰⣿⠀⢸⣿⣿⣇⠀⠀⢻⣿⠃⠀⠀⣿⣿⣿⣿⣿⣿⣿⣀⣀⣼⣿⠇⠀⣧⠀⣿⡄⠀⠀⠈⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⡇⢸⣿⠀⢸⣿⣿⣿⣆⢠⡀⠹⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⣷⣮⣭⣥⣤⣾⡇⣸⣿⣿⠀⠀⠀⢸⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠻⣿⣿⣿⡇⠘⣿⡄⠘⣿⣿⣿⣿⣧⡙⣷⣦⣄⡀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣫⣾⣿⣿⣿⠀⢸⠀⢸⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡞⠀⠀⠻⣿⣿⣷⡀⠹⣇⠀⢻⣿⣿⣿⣿⣿⣦⡛⢿⣿⣿⣶⣦⣭⣭⣍⣉⣉⣭⣭⣶⣿⣿⣿⣿⣿⠃⢀⣿⠀⣾⣿⣿⣿⢁⣀⣀⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⠁⠀⠀⢀⠹⣿⣿⣷⡄⠈⠀⠘⣿⣿⣿⣿⣿⣿⣿⣦⣍⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⣠⣿⢏⣾⣿⣿⣿⠏⠙⣿⣿⣿⣦⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⠀⠀⠀⣾⣆⠘⢿⣿⣿⣦⣀⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⣙⠻⢿⣿⣿⣿⣿⣿⡿⠿⠋⠁⠠⠞⣫⣵⣿⣿⣿⠟⠁⣠⠇⢸⣿⣿⣿⡇⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⠀⠀⢠⣿⣿⣄⠀⠹⣿⣿⣿⣷⣄⡉⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣭⣉⠉⢉⣀⣀⣀⣤⣴⣶⣿⣿⡿⠿⠋⠁⣠⣾⡿⠀⣸⣿⣿⣿⣷⡀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣯⠀⠀⣾⣿⣿⣿⣦⡀⠈⠻⢿⣿⣿⣿⣷⣦⣌⡉⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣭⣉⡉⠉⠉⠉⠉⠀⢀⣀⣴⣾⣿⡿⠁⣰⣿⣿⣿⣿⣿⣿⣦⡀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⣿⣿⣿⣿⣿⣿⣦⡀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣶⣤⣤⣈⣉⠙⠛⠛⠛⠛⠛⠛⢛⣛⣉⣥⣤⣶⣾⣿⣿⣿⣿⠏⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣷
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⡄⠀⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣡⣴⣿⣿⣿⠿⠛⠛⠉⠉⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣷⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⡄⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⢋⣥⣴⡿⠟⣻⠏⠁⠀⠀⠀⢰⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⡄⠀⠀⠘⣿⣿⣧⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⡀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠋⠁⠀⠀⣀⣠⣤⣶⣿⠋⠀⠀⠀⠀⢀⡞⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢷⡀⠀⠀⠹⣿⣿⣧⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠋⢁⣀⣤⣴⣶⣾⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⠀⣾⠁⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠸⣷⡀⠀⠀⠹⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠹⣿⣿⣿⣿⣿⡿⢋⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⢀⣾⠃⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠹⣿⣦⡀⠀⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⢿⣿⣿⣿⢋⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁⠀⠀⠀⠀⣰⣿⠋⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠙⣿⣿⣷⣦⣌⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⢸⣿⡿⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠁⠀⠀⠀⣠⣾⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢨⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⣀⣴⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⣠⠀⠀⠀⠀⠀⠈⠛⠿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣽⣿⠿⣿⣿⣿⣿⣿⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠋⢀⣠⣴⣾⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣼⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠉⠈⢹⣿⣿⣿⣿⣿⣿⣮⣭⣛⣛⣹⠿⠿⠿⠿⠿⠿⠿⠟⣛⣋⣡⣤⣶⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⢠⣾⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢸⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⡿⣿⣛⣭⣭⣽⣿⣛⣛⠛⠛⠛⠛⠋⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢸⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⠟⠁⠀⠀⠉⠛⢿⣿⣿⣿⣿⣿⣶⣤⣄⣀⠀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⣼⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠙⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣄⠀⠀⠀⠀⠀⢸⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀⢸⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣀⣤⣴⣶⣶⣶⣶⣿⣷⣶⣶⣶⣶⣤⣤⡀⠀⠀⠀⠀⠀⠀⠀
+⠀⠘⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣯⡻⣿⣿⣿⣇⠀⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⣿⣿⣿⣿⣿⣿⣿⣻⣿⣿⣿⣿⣿⣿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣮⡻⣿⣿⣸⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣴⣿⣿⣿⣿⣿⣿⣟⣿⣾⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠉⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⡜⣿⢹⣿⣿⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⢟⣫⣾⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⡍⢸⣿⣿⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⢟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠛⠛⠉⣧⢸⣿⣿⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⠟⣵⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⡇⠀⠀⠀⠀⢸⣿⣿⡿⣡⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿⡇⠀⠀⠀⠀⢸⣿⠟⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⠀⠀⠀⠀⠸⢋⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⡭⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⢀⣿⣿⣿⣿⣿⣿⣿⣿⠟⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣷⠀⠀⢀⣿⠏⠉⠉⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⣾⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣼⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⣿⣷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣿⣿⣿⣧⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⠿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
+よかったらこのコード自由に使っていいよ、でもクレジットはちゃんと入れてねw
+
+]]
+
+local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
+
+local scripts = {}
+local ready = false
+
+task.spawn(function()
+	local ok, raw = pcall(game.HttpGet, game, HUB_URL)
+	if not ok or not raw then ready = true return end
+	local hs = game:GetService("HttpService")
+	local ok2, data = pcall(hs.JSONDecode, hs, raw)
+	if ok2 and type(data) == "table" then scripts = data end
+	ready = true
+end)
+
+local function wrapName(text, maxLen)
+	maxLen = maxLen or 28
+	if #text <= maxLen then return text end
+	local result = ""
+	while #text > maxLen do
+		local chunk = text:sub(1, maxLen)
+		local lastSpace = chunk:match(".*()%s") 
+		if lastSpace and lastSpace > maxLen * 0.5 then
+			result = result .. text:sub(1, lastSpace - 1) .. "\n"
+			text = text:sub(lastSpace + 1)
+		else
+			result = result .. chunk .. "\n"
+			text = text:sub(maxLen + 1)
+		end
+	end
+	return result .. text
+end
+
+local function buildGameListFrom(list)
+	local seen, out = {}, {"All Games"}
+	for _, s in ipairs(list) do
+		if s.game and not seen[s.game] then
+			seen[s.game] = true
+			table.insert(out, wrapName(s.game))
+		end
+	end
+	table.sort(out, function(a, b)
+		if a == "All Games" then return true end
+		if b == "All Games" then return false end
+		return a < b
+	end)
+	return out
+end
+
+local function doFilter(search, gameIdx, gameList, sortIdx)
+	local q = (search or ""):lower():match("^%s*(.-)%s*$")
+	local gameFilter = gameList[gameIdx + 1]
+	local out = {}
+	for _, s in ipairs(scripts) do
+		local skip = false
+		if gameFilter ~= "All Games" and wrapName(s.game or "") ~= gameFilter then skip = true end
+		if not skip and q ~= "" then
+			local inName     = s.name     and s.name:lower():find(q, 1, true)
+			local inGame     = s.game     and s.game:lower():find(q, 1, true)
+			local inUploader = s.uploader and s.uploader:lower():find(q, 1, true)
+			if not inName and not inGame and not inUploader then skip = true end
+		end
+		if not skip then table.insert(out, s) end
+	end
+	if sortIdx == 1 then
+		table.sort(out, function(a, b) return (a.name or "") < (b.name or "") end)
+	elseif sortIdx == 2 then
+		table.sort(out, function(a, b) return (a.name or "") > (b.name or "") end)
+	elseif sortIdx == 3 then
+		table.sort(out, function(a, b) return (a.game or "") < (b.game or "") end)
+	end
+	return out
+end
+
+local function parseGlobals(src)
+	local entries = {}
+	local pos = 1
+	while pos <= #src do
+		local s, e, gname = src:find("_G%.([%w_]+)%s*=", pos)
+		if not s then break end
+		local _, wsEnd = src:find("^%s*", e + 1)
+		local valPos = (wsEnd or e) + 1
+		if src:sub(valPos, valPos) == "{" then
+			local depth, blockEnd = 0, valPos
+			for i = valPos, #src do
+				local c = src:sub(i, i)
+				if c == "{" then
+					depth = depth + 1
+				elseif c == "}" then
+					depth = depth - 1
+					if depth == 0 then blockEnd = i break end
+				end
+			end
+			local body = src:sub(valPos + 1, blockEnd - 1)
+			local fields = {}
+			for line in body:gmatch("[^\n]+") do
+				local noComment = line:match("^(.-)%s*%-%-.*$") or line
+				local k, v = noComment:match("^%s*([%w_]+)%s*=%s*(.-)%s*,?%s*$")
+				if k and v and v ~= "" then
+					table.insert(fields, {key = k, default = v})
+				end
+			end
+			if #fields > 0 then
+				table.insert(entries, {kind = "block", name = gname, fields = fields})
+			end
+			pos = blockEnd + 1
+		else
+			local line = src:match("^([^\n]*)", valPos)
+			if line then
+				local val = line:match("^(.-)%s*%-%-.*$") or line
+				val = val:match("^(.-)%s*;?%s*$") or val
+				val = val:match("^%s*(.-)%s*$") or val
+				if val ~= "" then
+					table.insert(entries, {kind = "single", name = gname, default = val})
+				end
+				pos = valPos + #line + 1
+			else
+				pos = e + 1
+			end
+		end
+	end
+	return #entries > 0 and entries or nil
+end
+
+local function buildGlobalsOverride(entries, prefix)
+	local parts = {}
+	for _, entry in ipairs(entries) do
+		if entry.kind == "single" then
+			local wid = "gv_" .. prefix .. "_" .. entry.name
+			local val = tostring(UI.GetValue(wid) or entry.default):match("^%s*(.-)%s*$")
+			table.insert(parts, "_G." .. entry.name .. " = " .. val)
+		elseif entry.kind == "block" then
+			table.insert(parts, "_G." .. entry.name .. " = {")
+			for _, f in ipairs(entry.fields) do
+				local wid = "gv_" .. prefix .. "_" .. entry.name .. "_" .. f.key
+				local val = tostring(UI.GetValue(wid) or f.default):match("^%s*(.-)%s*$")
+				table.insert(parts, "    " .. f.key .. " = " .. val .. ",")
+			end
+			table.insert(parts, "}")
+		end
+	end
+	return table.concat(parts, "\n")
+end
+
+local prevQ, prevGame, prevSort = "", -1, -1
+local comboId = 0
+
+UI.AddTab("Script Library", function(tab)
+	if not ready then
+		local s = tab:Section("Please wait", "Left")
+		s:Text("Loading scripts from the hub...")
+		return
+	end
+
+	local q       = UI.GetValue("lib_q")    or ""
+	local gameIdx = UI.GetValue("lib_game") or 0
+	local sortIdx = UI.GetValue("lib_sort") or 0
+
+	local tempList = doFilter(q, 0, {"All Games"}, 0)
+	local gameList = buildGameListFrom(#q > 0 and tempList or scripts)
+
+	if gameIdx >= #gameList then
+		gameIdx = 0
+		UI.SetValue("lib_game", 0)
+	end
+
+	local filterSec = tab:Section("Filters", "Left", {"Search", "Game & Sort"})
+
+	if filterSec.page == 0 then
+		filterSec:InputText("lib_q", "Name, game, or creator...", "")
+		filterSec:Spacing()
+		filterSec:Text("Matches name, game and uploader fields.")
+	elseif filterSec.page == 1 then
+		filterSec:Combo("lib_game", "Game", gameList, gameIdx)
+		filterSec:Spacing()
+		filterSec:Combo("lib_sort", "Order", {"Default", "Name A-Z", "Name Z-A", "Game A-Z"}, sortIdx)
+		filterSec:Spacing()
+		filterSec:Button("Clear Filters", function()
+			UI.SetValue("lib_q", "")
+			UI.SetValue("lib_game", 0)
+			UI.SetValue("lib_sort", 0)
+		end)
+	end
+
+	local changed = (q ~= prevQ or gameIdx ~= prevGame or sortIdx ~= prevSort)
+	if changed then
+		prevQ, prevGame, prevSort = q, gameIdx, sortIdx
+		UI.SetValue("lib_pick", 0)
+		comboId = comboId + 1
+	end
+
+	local filtered = doFilter(q, gameIdx, gameList, sortIdx)
+	local label = #filtered == 1 and "1 script found" or (#filtered .. " scripts found")
+
+	local names = {}
+	for _, s in ipairs(filtered) do
+		table.insert(names, wrapName(s.name or ""))
+	end
+	if #names == 0 then names = {"No results"} end
+
+	local listSec = tab:Section(label, "Left")
+	listSec:Combo("lib_pick_" .. comboId, "Script", names, 0)
+
+	local idx    = (UI.GetValue("lib_pick_" .. comboId) or 0) + 1
+	local chosen = filtered[idx]
+
+	local cfgPrefix = chosen and (chosen.name or ""):gsub("[^%w]", "_") or ""
+	local gEntries  = chosen and chosen.script and parseGlobals(chosen.script) or nil
+
+	if gEntries then
+		local cfgSec = tab:Section("_G Config", "Left")
+		for _, entry in ipairs(gEntries) do
+			if entry.kind == "single" then
+				local wid = "gv_" .. cfgPrefix .. "_" .. entry.name
+				cfgSec:InputText(wid, "_G." .. entry.name, entry.default)
+			elseif entry.kind == "block" then
+				cfgSec:Text("_G." .. entry.name)
+				cfgSec:Spacing()
+				for _, f in ipairs(entry.fields) do
+					local wid = "gv_" .. cfgPrefix .. "_" .. entry.name .. "_" .. f.key
+					cfgSec:InputText(wid, f.key, f.default)
+				end
+				cfgSec:Spacing()
+			end
+		end
+	end
+
+	local infoSec = tab:Section("Script Details", "Right", {"Info", "Loadstring"})
+
+	if infoSec.page == 0 then
+		if chosen then
+			infoSec:Text("Name")
+			infoSec:Text(wrapName(chosen.name or "—"))
+			infoSec:Spacing()
+			infoSec:Text("Creator")
+			infoSec:Text(chosen.uploader or "Unknown")
+			infoSec:Spacing()
+			infoSec:Text("Game")
+			infoSec:Text(wrapName(chosen.game or "Unknown"))
+		else
+			infoSec:Spacing()
+			infoSec:Text("No script selected.")
+			infoSec:Text("Pick one from the left panel.")
+		end
+	elseif infoSec.page == 1 then
+		if chosen and chosen.script then
+			local preview = chosen.script:len() > 110
+				and chosen.script:sub(1, 110) .. "..."
+				or chosen.script
+			infoSec:Text("Loadstring preview:")
+			infoSec:Spacing()
+			infoSec:Text(preview)
+		else
+			infoSec:Text("Select a script to see the loadstring.")
+		end
+	end
+
+	local execSec = tab:Section("Execute", "Right")
+
+	if chosen then
+		execSec:Text("Selected:  " .. wrapName(chosen.name or "?"))
+		if gEntries then
+			execSec:Text("_G config detected — edit it on the left.")
+		end
+		execSec:Spacing()
+	else
+		execSec:Text("No script selected.")
+		execSec:Spacing()
+	end
+
+	execSec:Button("Execute Script", 210, 34, function()
+		if not chosen or not chosen.script then return end
+		local finalScript = chosen.script
+		if gEntries then
+			local override = buildGlobalsOverride(gEntries, cfgPrefix)
+			finalScript = override .. "\n" .. finalScript
+		end
+		local fn, loadErr = loadstring(finalScript)
+		if not fn then
+			warn("[ScriptLib] Could not load: " .. tostring(loadErr))
+			return
+		end
+		local ok, runErr = pcall(fn)
+		if not ok then
+			warn("[ScriptLib] Script errored: " .. tostring(runErr))
+		end
+	end)
+end)
+
+notify("Script Library tab was added to your Matcha interface", "Script Library", 7)
+warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
