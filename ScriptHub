@@ -19,13 +19,15 @@ local FIXED_POS = Vector2.new(10, 600)
 -- ─────────────────────────────────────────
 local function playExecuteSound()
     task.spawn(function()
-        local s = Instance.new("Sound")
-        s.SoundId = "rbxassetid://170765130" 
-        s.Volume = 1
-        s.Parent = game:GetService("SoundService")
-        s:Play()
-        s.Ended:Wait()
-        s:Destroy()
+        pcall(function()
+            local s = Instance.new("Sound")
+            s.SoundId = "rbxassetid://170765130" 
+            s.Volume = 1
+            s.Parent = game:GetService("SoundService")
+            s:Play()
+            s.Ended:Wait()
+            s:Destroy()
+        end)
     end)
 end
 
@@ -79,16 +81,16 @@ local function isFavorite(name)
 end
 
 -- ─────────────────────────────────────────
---  OVERLAY SYSTEM (REMOVED "BY MATCHA")
+--  OVERLAY SYSTEM (FIXED NIL NEW ERROR)
 -- ─────────────────────────────────────────
 local function destroyOverlay()
     for _, obj in ipairs(overlayObjects) do
-        if obj then
-            pcall(function()
+        pcall(function()
+            if obj then
                 obj.Visible = false
                 obj:Remove()
-            end)
-        end
+            end
+        end)
     end
     overlayObjects = {}
 end
@@ -97,25 +99,31 @@ local function buildOverlay(scriptName, uploaderName)
     destroyOverlay()
     if not overlayEnabled then return end
 
-    local bg = Drawing.new("Square")
-    bg.Filled, bg.Color, bg.Transparency = true, Color3.fromRGB(15, 15, 15), 0.45
-    bg.Position, bg.Size, bg.Visible = FIXED_POS, Vector2.new(300, 40), true
-    table.insert(overlayObjects, bg)
+    -- Safety check for Drawing API
+    local drawLib = (Drawing or (getgenv and getgenv().Drawing))
+    if not drawLib or type(drawLib) ~= "table" or not drawLib.new then return end
 
-    local accent = Drawing.new("Square")
-    accent.Filled, accent.Color = true, Color3.fromRGB(191, 64, 191)
-    accent.Position, accent.Size, accent.Visible = FIXED_POS, Vector2.new(4, 40), true
-    table.insert(overlayObjects, accent)
+    pcall(function()
+        local bg = drawLib.new("Square")
+        bg.Filled, bg.Color, bg.Transparency = true, Color3.fromRGB(15, 15, 15), 0.45
+        bg.Position, bg.Size, bg.Visible = FIXED_POS, Vector2.new(300, 40), true
+        table.insert(overlayObjects, bg)
 
-    local labelActive = Drawing.new("Text")
-    labelActive.Text, labelActive.Color, labelActive.Size = "ACTIVE SCRIPT", Color3.fromRGB(191, 64, 191), 13
-    labelActive.Position, labelActive.Visible, labelActive.Outline = FIXED_POS + Vector2.new(12, 4), true, true
-    table.insert(overlayObjects, labelActive)
+        local accent = drawLib.new("Square")
+        accent.Filled, accent.Color = true, Color3.fromRGB(191, 64, 191)
+        accent.Position, accent.Size, accent.Visible = FIXED_POS, Vector2.new(4, 40), true
+        table.insert(overlayObjects, accent)
 
-    local labelName = Drawing.new("Text")
-    labelName.Text, labelName.Color, labelName.Size = wrapName(scriptName, 28), Color3.fromRGB(235, 235, 235), 13
-    labelName.Position, labelName.Visible, labelName.Outline = FIXED_POS + Vector2.new(12, 19), true, true
-    table.insert(overlayObjects, labelName)
+        local labelActive = drawLib.new("Text")
+        labelActive.Text, labelActive.Color, labelActive.Size = "ACTIVE SCRIPT", Color3.fromRGB(191, 64, 191), 13
+        labelActive.Position, labelActive.Visible, labelActive.Outline = FIXED_POS + Vector2.new(12, 4), true, true
+        table.insert(overlayObjects, labelActive)
+
+        local labelName = drawLib.new("Text")
+        labelName.Text, labelName.Color, labelName.Size = wrapName(scriptName, 28), Color3.fromRGB(235, 235, 235), 13
+        labelName.Position, labelName.Visible, labelName.Outline = FIXED_POS + Vector2.new(12, 19), true, true
+        table.insert(overlayObjects, labelName)
+    end)
 end
 
 -- ─────────────────────────────────────────
@@ -123,10 +131,11 @@ end
 -- ─────────────────────────────────────────
 task.spawn(function()
     local ok, raw = pcall(game.HttpGet, game, HUB_URL)
-    if ok and raw then 
+    if ok and raw and raw:sub(1,1) ~= "<" then 
         local hs = game:GetService("HttpService")
         pcall(function() scripts = hs:JSONDecode(raw) end) 
     end
+    task.wait(0.2) -- Small delay to prevent deadlock
     ready = true
     notify("Matcha", "Library Loaded: " .. #scripts .. " scripts available")
 end)
@@ -339,5 +348,4 @@ end)
 
 loadFavorites()
 notify("Script Library loaded!", "Script Library", 7)
- 
 warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
