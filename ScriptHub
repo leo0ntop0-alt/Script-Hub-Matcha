@@ -198,7 +198,7 @@ UI.AddTab("Script Library V2", function(tab)
                 forcedReset = forcedReset + 1
             end)
 
-            controlSec:Button("Run Selected Script            ", 200, 40, function()
+            controlSec:Button("Run Selected Script            ", 199, 40, function()
                 local fn, err = loadstring(chosen.script)
                 if fn then
                     task.spawn(fn)
