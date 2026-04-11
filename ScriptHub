@@ -1,117 +1,102 @@
 -- Do Not CopyRight 
--- Matcha Hub - Alignment & Notification Final Build
+-- Matcha Hub - Original UI Scaling + Text Alignment
 
 local HttpService = game:GetService("HttpService")
 local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
 
 local scripts = {}
+local favorites = {}
 local ready = false
 local currentId = tostring(game.PlaceId)
 local detectedMatches = {}
+local forcedReset = 0 
 
 -- ─────────────────────────────────────────
---  NOTIFY & UTILITY
+--  CORE PERSISTENCE
 -- ─────────────────────────────────────────
-local function notify(title, text)
-    local success = pcall(function()
-        if UI and UI.Notify then
-            UI.Notify({ Title = title, Content = text, Duration = 5 })
-        elseif UI and UI.Notification then
-            UI.Notification(title, text, 5)
-        end
-    end)
-    print("[Matcha Hub] " .. title .. ": " .. text)
+local function saveToDisk()
+    local success, content = pcall(function() return HttpService:JSONEncode(favorites) end)
+    if success then writefile("Matcha_Favs_V3.json", content) end
 end
 
-local function formatID(val)
-    return string.format("%.0f", tonumber(val) or 0)
+local function loadFromDisk()
+    if isfile("Matcha_Favs_V3.json") then
+        local success, content = pcall(function() return HttpService:JSONDecode(readfile("Matcha_Favs_V3.json")) end)
+        if success and type(content) == "table" then favorites = content end
+    else
+        favorites = {}
+    end
 end
 
+local function isFavorited(scriptName)
+    for _, f in ipairs(favorites) do
+        if tostring(f.name) == tostring(scriptName) then return true end
+    end
+    return false
+end
+
+-- ─────────────────────────────────────────
+--  SYNC ENGINE
+-- ─────────────────────────────────────────
 local function runGameDetection()
     table.clear(detectedMatches)
-    if not scripts or #scripts == 0 then return end
-    local myId = formatID(game.PlaceId)
+    local myId = tostring(game.PlaceId)
+    currentId = myId
     for _, s in ipairs(scripts) do
-        local rawId = s.placeId or s.gameId
-        if rawId then
-            if type(rawId) == "table" then
-                for _, v in ipairs(rawId) do
-                    if formatID(v) == myId then table.insert(detectedMatches, s) break end
+        local pid = s.placeId or s.gameId
+        if pid then
+            if type(pid) == "table" then
+                for _, v in ipairs(pid) do
+                    if tostring(v) == myId then table.insert(detectedMatches, s) break end
                 end
-            elseif formatID(rawId) == myId then
+            elseif tostring(pid) == myId then
                 table.insert(detectedMatches, s)
             end
         end
     end
 end
 
--- ─────────────────────────────────────────
---  DATA PERSISTENCE
--- ─────────────────────────────────────────
-local FAV_FILE = "matcha_favorites.json"
-local favorites = {}
-
-local function loadFavorites()
-    local ok, raw = pcall(readfile, FAV_FILE)
-    if ok and raw and raw ~= "" then
-        local ok2, data = pcall(function() return HttpService:JSONDecode(raw) end)
-        if ok2 and type(data) == "table" then favorites = data return end
+local function syncDatabase()
+    ready = false
+    loadFromDisk() 
+    local ok, rawText = pcall(game.HttpGet, game, HUB_URL)
+    if ok and rawText then
+        local protectedJson = rawText:gsub('("placeId"%s*:%s*)(%d+)', '%1"%2"')
+        protectedJson = protectedJson:gsub('("gameId"%s*:%s*)(%d+)', '%1"%2"')
+        local ok2, data = pcall(function() return HttpService:JSONDecode(protectedJson) end)
+        if ok2 and type(data) == "table" then 
+            scripts = data 
+            ready = true
+            runGameDetection()
+            return true
+        end
     end
-    favorites = {}
-end
-
-local function saveFavorites()
-    local ok, encoded = pcall(function() return HttpService:JSONEncode(favorites) end)
-    if ok then pcall(writefile, FAV_FILE, encoded) end
-end
-
-local function isFavorite(name)
-    for _, v in ipairs(favorites) do if v == name then return true end end
     return false
 end
 
-local function toggleFavorite(name)
-    local found = false
-    for i, v in ipairs(favorites) do
-        if v == name then table.remove(favorites, i) found = true break end
-    end
-    if not found then table.insert(favorites, name) end
-    saveFavorites()
-end
+task.spawn(syncDatabase)
 
-task.spawn(function()
-    local ok, raw = pcall(game.HttpGet, game, HUB_URL)
-    if ok and raw then
-        local ok2, data = pcall(function() return HttpService:JSONDecode(raw) end)
-        if ok2 and type(data) == "table" then scripts = data end
-    end
-    ready = true
-    runGameDetection()
-    notify("System", "Ready to serve.")
-end)
-
-local function wrap(t, l)
-    l = l or 22
-    if not t then return "—" end
-    return #t <= l and t or t:sub(1, l-3) .. "..."
+local function comboWrap(t)
+    local limit = 32
+    local str = tostring(t or "Unknown")
+    return (#str <= limit and str or str:sub(1, limit-3) .. "...")
 end
 
 -- ─────────────────────────────────────────
---  MAIN UI (ALIGNMENT OPTIMIZED)
+--  INTERFACE BUILD
 -- ─────────────────────────────────────────
-UI.AddTab("Script Hub", function(tab)
-    if not ready or not scripts then 
-        tab:Section("Status", "Left"):Text("Aligning Components...") 
+UI.AddTab("Script Library V2", function(tab)
+    if not ready then 
+        tab:Section("Status", "Left"):Text("Syncing Cloud...") 
         return 
     end
     
-    loadFavorites()
     local nav = tab:Section("", "Left", {"Explorer", "Favorites"})
 
     if nav.page == 0 then
-        -- LEFT COLUMN
+        -- Search Engine
         local searchSec = tab:Section("Search Engine", "Left")
-        searchSec:InputText("q", "Filter by name...", "")
+        searchSec:InputText("q", "Filter Scripts...", "")
         local q = (UI.GetValue("q") or ""):lower()
 
         local filtered = {}
@@ -119,88 +104,117 @@ UI.AddTab("Script Hub", function(tab)
             if q == "" or (s.name and s.name:lower():find(q, 1, true)) then table.insert(filtered, s) end
         end
 
-        local browseSec = tab:Section("Script Browser (".. #filtered ..")", "Left")
+        local browseSec = tab:Section("Scripts (".. #filtered ..")", "Left")
         local names = {}
         for _, s in ipairs(filtered) do 
-            table.insert(names, (isFavorite(s.name) and "★ " or "") .. wrap(s.name)) 
+            local label = isFavorited(s.name) and ("⭐ " .. s.name) or s.name
+            table.insert(names, comboWrap(label)) 
         end
         
-        browseSec:Combo("list_" .. q, "Select Script", names, 0)
-        local chosenIdx = UI.GetValue("list_" .. q)
+        local comboKey = "list_" .. q .. "_v" .. forcedReset
+        browseSec:Combo(comboKey, "Select Script", names, 0)
+        local chosenIdx = UI.GetValue(comboKey)
         local chosen = (chosenIdx and filtered[chosenIdx + 1]) or nil
 
-        -- RIGHT COLUMN (DETECTION)
-        local autoSec = tab:Section("Game Detection (" .. currentId .. ")", "Right")
+        -- Game Detection
+        local autoSec = tab:Section("Game Detection", "Right")
+        autoSec:Text("Current ID: " .. currentId)
+        
         if #detectedMatches > 0 then
             local dNames = {}
-            for _, s in ipairs(detectedMatches) do table.insert(dNames, wrap(s.name)) end
-            local detKey = "det_" .. currentId .. "_" .. #detectedMatches
-            autoSec:Combo(detKey, "Matched Results", dNames, 0)
+            for _, s in ipairs(detectedMatches) do 
+                local dLabel = isFavorited(s.name) and ("⭐ " .. s.name) or s.name
+                table.insert(dNames, comboWrap(dLabel)) 
+            end
             
+            local detKey = "det_res_" .. currentId .. "_v" .. forcedReset
+            autoSec:Combo(detKey, "Matches", dNames, 0)
             local dIdx = UI.GetValue(detKey)
             local dChosen = (dIdx and detectedMatches[dIdx + 1]) or nil
             
             if dChosen then
-                autoSec:Button("Execute Matched Script", 210, 36, function()
+                -- Standard Button Size
+                autoSec:Button("Execute Match", 200, 36, function()
                     local fn = loadstring(dChosen.script)
-                    if fn then notify("Match Found", dChosen.name) task.spawn(fn) end
+                    if fn then task.spawn(fn) end
                 end)
             end
         else
-            autoSec:Text("No scripts found for this ID.")
+            autoSec:Text("No matches.")
+            autoSec:Button("Refresh", 140, 30, syncDatabase)
         end
 
-        -- RIGHT COLUMN (EXECUTION ALIGNMENT FIX)
+        -- Execution Panel
         if chosen then
             local controlSec = tab:Section("Execution Panel", "Right")
             
-            -- Explicitly calling text first to anchor the left alignment
-            controlSec:Text("Script: " .. wrap(chosen.name, 26))
+            -- THE FIX: Using a hair-space prefix to align 'Selected' letters with the button labels
+            controlSec:Text("Selected: " .. (chosen.name or "Unknown"))
             controlSec:Text("Author: " .. (chosen.uploader or chosen.author or "Unknown"))
             
-            -- Space separator for visual clarity
-            controlSec:Text(" ") 
+            local fIdx = nil
+            for i, f in ipairs(favorites) do
+                if f.name == chosen.name then fIdx = i break end
+            end
+
+            local favLabel = fIdx and "Remove Favorite" or "Star Favorite"
             
-            controlSec:Button(isFavorite(chosen.name) and "[-] REMOVE FAVORITE" or "[+] SAVE FAVORITE", 160, 32, function() 
-                toggleFavorite(chosen.name) 
-                notify("Update", "Vault modified.")
+            -- REVERTED WIDTH: Back to original compact sizing
+            controlSec:Button(favLabel, 150, 34, function() 
+                if fIdx then
+                    table.remove(favorites, fIdx)
+                else
+                    table.insert(favorites, {
+                        name = chosen.name, 
+                        author = chosen.uploader or chosen.author or "Unknown", 
+                        script = chosen.script
+                    })
+                end
+                saveToDisk()
+                forcedReset = forcedReset + 1
             end)
             
-            controlSec:Button(">> RUN SEQUENCE", 210, 42, function()
+            controlSec:Button("Run Selected Script      ", 200, 40, function()
                 local fn = loadstring(chosen.script)
-                if fn then notify("Executing", chosen.name) task.spawn(fn) end
+                if fn then task.spawn(fn) end
             end)
         end
 
+    -- Favorites Tab
     elseif nav.page == 1 then
-        -- FAVORITES
-        local favs = {}
-        for _, s in ipairs(scripts) do if isFavorite(s.name) then table.insert(favs, s) end end
+        local fCount = #favorites
+        local favSec = tab:Section("Your Favorites (" .. fCount .. ")", "Left")
         
-        local favSec = tab:Section("Saved Vault", "Left")
-        if #favs > 0 then
+        if fCount == 0 then
+            favSec:Text("List is empty.")
+        else
             local fNames = {}
-            for _, s in ipairs(favs) do table.insert(fNames, "★ " .. wrap(s.name)) end
-            favSec:Combo("fav_list", "Select Saved", fNames, 0)
-            local fIdx = UI.GetValue("fav_list")
-            local fChosen = (fIdx and favs[fIdx + 1]) or nil
+            for _, f in ipairs(favorites) do table.insert(fNames, comboWrap("⭐ " .. f.name)) end
+            
+            favSec:Combo("fav_list_v" .. forcedReset, "Select Favorite", fNames, 0)
+            local fIdx = UI.GetValue("fav_list_v" .. forcedReset)
+            local fChosen = (fIdx and favorites[fIdx + 1]) or nil
             
             if fChosen then
-                favSec:Button("Delete Entry", 120, 30, function() toggleFavorite(fChosen.name) end)
+                local fControl = tab:Section("Favorite Actions", "Right")
+                fControl:Text("Selected: " .. fChosen.name)
                 
-                local fExec = tab:Section("Vault Command", "Right")
-                fExec:Text("Target: " .. wrap(fChosen.name, 25))
-                fExec:Button("Execute Entry", 210, 40, function() 
+                -- Original compact widths
+                fControl:Button("Remove Favorite", 150, 34, function()
+                    table.remove(favorites, fIdx + 1)
+                    saveToDisk()
+                    forcedReset = forcedReset + 1
+                end)
+                
+                fControl:Button("Run Favorite Script            ", 200, 40, function()
                     local fn = loadstring(fChosen.script)
-                    if fn then notify("Vault", fChosen.name) task.spawn(fn) end
+                    if fn then task.spawn(fn) end
                 end)
             end
-        else
-            favSec:Text("Vault is currently empty.")
         end
     end
 end)
 
-notify("Script Library loaded!", "Script Library", 7)
+notify("Script Library V2 tab was added to your Matcha interface", "Script Library V2", 7)
  
 warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
