@@ -1,351 +1,206 @@
 -- Do Not CopyRight 
--- I will take actions aganist CopyRight
--- SOFTWARE.
+-- Matcha Hub - Alignment & Notification Final Build
 
+local HttpService = game:GetService("HttpService")
 local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
-local FAV_FILE = "matcha_favorites.json"
 
 local scripts = {}
 local ready = false
+local currentId = tostring(game.PlaceId)
+local detectedMatches = {}
+
+-- ─────────────────────────────────────────
+--  NOTIFY & UTILITY
+-- ─────────────────────────────────────────
+local function notify(title, text)
+    local success = pcall(function()
+        if UI and UI.Notify then
+            UI.Notify({ Title = title, Content = text, Duration = 5 })
+        elseif UI and UI.Notification then
+            UI.Notification(title, text, 5)
+        end
+    end)
+    print("[Matcha Hub] " .. title .. ": " .. text)
+end
+
+local function formatID(val)
+    return string.format("%.0f", tonumber(val) or 0)
+end
+
+local function runGameDetection()
+    table.clear(detectedMatches)
+    if not scripts or #scripts == 0 then return end
+    local myId = formatID(game.PlaceId)
+    for _, s in ipairs(scripts) do
+        local rawId = s.placeId or s.gameId
+        if rawId then
+            if type(rawId) == "table" then
+                for _, v in ipairs(rawId) do
+                    if formatID(v) == myId then table.insert(detectedMatches, s) break end
+                end
+            elseif formatID(rawId) == myId then
+                table.insert(detectedMatches, s)
+            end
+        end
+    end
+end
+
+-- ─────────────────────────────────────────
+--  DATA PERSISTENCE
+-- ─────────────────────────────────────────
+local FAV_FILE = "matcha_favorites.json"
 local favorites = {}
 
--- Overlay Configuration
-local overlayEnabled = false
-local overlayObjects = {}
-local FIXED_POS = Vector2.new(10, 600)
-
--- ─────────────────────────────────────────
---  AUDIO & NOTIFY HELPERS
--- ─────────────────────────────────────────
-local function playExecuteSound()
-    task.spawn(function()
-        pcall(function()
-            local s = Instance.new("Sound")
-            s.SoundId = "rbxassetid://170765130" 
-            s.Volume = 1
-            s.Parent = game:GetService("SoundService")
-            s:Play()
-            s.Ended:Wait()
-            s:Destroy()
-        end)
-    end)
-end
-
-local function notify(title, text, duration)
-    task.spawn(function()
-        pcall(function()
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = title,
-                Text = text,
-                Duration = duration or 3
-            })
-        end)
-    end)
-end
-
-local function wrapName(text, maxLen)
-    maxLen = maxLen or 28
-    if not text then return "—" end
-    if #text <= maxLen then return text end
-    return text:sub(1, maxLen-3) .. "..."
-end
-
--- ─────────────────────────────────────────
---  FAVORITES SYSTEM
--- ─────────────────────────────────────────
 local function loadFavorites()
     local ok, raw = pcall(readfile, FAV_FILE)
     if ok and raw and raw ~= "" then
-        local hs = game:GetService("HttpService")
-        local ok2, data = pcall(hs.JSONDecode, hs, raw)
-        if ok2 and type(data) == "table" then 
-            favorites = data 
-            return 
-        end
+        local ok2, data = pcall(function() return HttpService:JSONDecode(raw) end)
+        if ok2 and type(data) == "table" then favorites = data return end
     end
     favorites = {}
 end
 
 local function saveFavorites()
-    local hs = game:GetService("HttpService")
-    local ok, encoded = pcall(hs.JSONEncode, hs, favorites)
+    local ok, encoded = pcall(function() return HttpService:JSONEncode(favorites) end)
     if ok then pcall(writefile, FAV_FILE, encoded) end
 end
 
 local function isFavorite(name)
-    if not name then return false end
-    for _, v in ipairs(favorites) do 
-        if v == name then return true end 
-    end
+    for _, v in ipairs(favorites) do if v == name then return true end end
     return false
 end
 
--- ─────────────────────────────────────────
---  OVERLAY SYSTEM (FIXED NIL NEW ERROR)
--- ─────────────────────────────────────────
-local function destroyOverlay()
-    for _, obj in ipairs(overlayObjects) do
-        pcall(function()
-            if obj then
-                obj.Visible = false
-                obj:Remove()
-            end
-        end)
+local function toggleFavorite(name)
+    local found = false
+    for i, v in ipairs(favorites) do
+        if v == name then table.remove(favorites, i) found = true break end
     end
-    overlayObjects = {}
+    if not found then table.insert(favorites, name) end
+    saveFavorites()
 end
 
-local function buildOverlay(scriptName, uploaderName)
-    destroyOverlay()
-    if not overlayEnabled then return end
-
-    -- Safety check for Drawing API
-    local drawLib = (Drawing or (getgenv and getgenv().Drawing))
-    if not drawLib or type(drawLib) ~= "table" or not drawLib.new then return end
-
-    pcall(function()
-        local bg = drawLib.new("Square")
-        bg.Filled, bg.Color, bg.Transparency = true, Color3.fromRGB(15, 15, 15), 0.45
-        bg.Position, bg.Size, bg.Visible = FIXED_POS, Vector2.new(300, 40), true
-        table.insert(overlayObjects, bg)
-
-        local accent = drawLib.new("Square")
-        accent.Filled, accent.Color = true, Color3.fromRGB(191, 64, 191)
-        accent.Position, accent.Size, accent.Visible = FIXED_POS, Vector2.new(4, 40), true
-        table.insert(overlayObjects, accent)
-
-        local labelActive = drawLib.new("Text")
-        labelActive.Text, labelActive.Color, labelActive.Size = "ACTIVE SCRIPT", Color3.fromRGB(191, 64, 191), 13
-        labelActive.Position, labelActive.Visible, labelActive.Outline = FIXED_POS + Vector2.new(12, 4), true, true
-        table.insert(overlayObjects, labelActive)
-
-        local labelName = drawLib.new("Text")
-        labelName.Text, labelName.Color, labelName.Size = wrapName(scriptName, 28), Color3.fromRGB(235, 235, 235), 13
-        labelName.Position, labelName.Visible, labelName.Outline = FIXED_POS + Vector2.new(12, 19), true, true
-        table.insert(overlayObjects, labelName)
-    end)
-end
-
--- ─────────────────────────────────────────
---  PARSERS
--- ─────────────────────────────────────────
 task.spawn(function()
     local ok, raw = pcall(game.HttpGet, game, HUB_URL)
-    if ok and raw and raw:sub(1,1) ~= "<" then 
-        local hs = game:GetService("HttpService")
-        pcall(function() scripts = hs:JSONDecode(raw) end) 
+    if ok and raw then
+        local ok2, data = pcall(function() return HttpService:JSONDecode(raw) end)
+        if ok2 and type(data) == "table" then scripts = data end
     end
-    task.wait(0.2) -- Small delay to prevent deadlock
     ready = true
-    notify("Matcha", "Library Loaded: " .. #scripts .. " scripts available")
+    runGameDetection()
+    notify("System", "Ready to serve.")
 end)
 
-local function parseGlobals(src)
-    local entries = {}
-    local pos = 1
-    while pos <= #src do
-        local s, e, gname = src:find("_G%.([%w_]+)%s*=", pos)
-        if not s then break end
-        local _, wsEnd = src:find("^%s*", e + 1)
-        local valPos = (wsEnd or e) + 1
-        if src:sub(valPos, valPos) == "{" then
-            local depth, blockEnd = 0, valPos
-            for i = valPos, #src do
-                local c = src:sub(i, i)
-                if c == "{" then depth = depth + 1 elseif c == "}" then depth = depth - 1 if depth == 0 then blockEnd = i break end end
-            end
-            local fields = {}
-            for line in src:sub(valPos + 1, blockEnd - 1):gmatch("[^\n]+") do
-                local k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*,?%s*$")
-                if k and v then table.insert(fields, {key = k, default = v}) end
-            end
-            if #fields > 0 then table.insert(entries, {kind = "block", name = gname, fields = fields}) end
-            pos = blockEnd + 1
-        else
-            local line = src:match("^([^\n]*)", valPos)
-            if line then
-                local val = line:match("^(.-)%s*;?%s*$") or line
-                table.insert(entries, {kind = "single", name = gname, default = val:match("^%s*(.-)%s*$")})
-                pos = valPos + #line + 1
-            else pos = e + 1 end
-        end
-    end
-    return #entries > 0 and entries or nil
-end
-
-local function buildGlobalsOverride(entries, prefix)
-    local parts = {}
-    for _, entry in ipairs(entries) do
-        if entry.kind == "single" then
-            local val = tostring(UI.GetValue("gv_" .. prefix .. "_" .. entry.name) or entry.default)
-            table.insert(parts, "_G." .. entry.name .. " = " .. val)
-        elseif entry.kind == "block" then
-            table.insert(parts, "_G." .. entry.name .. " = {")
-            for _, f in ipairs(entry.fields) do
-                local val = tostring(UI.GetValue("gv_" .. prefix .. "_" .. entry.name .. "_" .. f.key) or f.default)
-                table.insert(parts, "    " .. f.key .. " = " .. val .. ",")
-            end
-            table.insert(parts, "}")
-        end
-    end
-    return table.concat(parts, "\n")
+local function wrap(t, l)
+    l = l or 22
+    if not t then return "—" end
+    return #t <= l and t or t:sub(1, l-3) .. "..."
 end
 
 -- ─────────────────────────────────────────
---  MAIN UI
+--  MAIN UI (ALIGNMENT OPTIMIZED)
 -- ─────────────────────────────────────────
-local comboId, favComboId = 0, 0
-local prevQ, prevCat = "", -1
-
-UI.AddTab("Script Library V2", function(tab)
-    if not ready then tab:Section("Navigation"):Text("Connecting...") return end
-
-    local navSec = tab:Section("", "Left", {"Library", "Favorites"})
+UI.AddTab("Script Hub", function(tab)
+    if not ready or not scripts then 
+        tab:Section("Status", "Left"):Text("Aligning Components...") 
+        return 
+    end
     
-    local overlaySec = tab:Section("Overlay", "Left")
-    overlaySec:Toggle("lib_overlay", "Show Status Overlay", false, function(val)
-        overlayEnabled = val
-        if not val then destroyOverlay() else buildOverlay("No script active") end
-    end)
-    overlayEnabled = UI.GetValue("lib_overlay") or false
+    loadFavorites()
+    local nav = tab:Section("", "Left", {"Explorer", "Favorites"})
 
-    if navSec.page == 0 then
-        local q = UI.GetValue("lib_q") or ""
-        local catIdx = UI.GetValue("lib_cat") or 0
-        local catList = (function()
-            local s, o = {}, {"All Categories"}
-            for _, v in ipairs(scripts) do if v.game and not s[v.game] then s[v.game]=true table.insert(o, wrapName(v.game)) end end
-            table.sort(o, function(a,b) return a=="All Categories" or (b~="All Categories" and a<b) end)
-            return o
-        end)()
-        
-        if q ~= prevQ or catIdx ~= prevCat then prevQ, prevCat = q, catIdx comboId = comboId + 1 end
-
-        local searchSec = tab:Section("Navigation", "Left")
-        searchSec:InputText("lib_q", "Search name/game", "")
-        searchSec:Combo("lib_cat", "Category", catList, catIdx)
+    if nav.page == 0 then
+        -- LEFT COLUMN
+        local searchSec = tab:Section("Search Engine", "Left")
+        searchSec:InputText("q", "Filter by name...", "")
+        local q = (UI.GetValue("q") or ""):lower()
 
         local filtered = {}
         for _, s in ipairs(scripts) do
-            local catFilter = catList[catIdx + 1]
-            local skip = (catFilter ~= "All Categories" and wrapName(s.game) ~= catFilter)
-            if not skip and q ~= "" then
-                local inN = (s.name or ""):lower():find(q:lower(), 1, true)
-                local inG = (s.game or ""):lower():find(q:lower(), 1, true)
-                if not inN and not inG then skip = true end
-            end
-            if not skip then table.insert(filtered, s) end
+            if q == "" or (s.name and s.name:lower():find(q, 1, true)) then table.insert(filtered, s) end
         end
 
+        local browseSec = tab:Section("Script Browser (".. #filtered ..")", "Left")
         local names = {}
-        for _, s in ipairs(filtered) do table.insert(names, (isFavorite(s.name) and "★ " or "") .. wrapName(s.name)) end
-
-        local listSec = tab:Section(#filtered .. " Scripts Found", "Left")
-        listSec:Combo("lib_pick_" .. comboId, "Select Script", #names > 0 and names or {"No Results"}, 0)
+        for _, s in ipairs(filtered) do 
+            table.insert(names, (isFavorite(s.name) and "★ " or "") .. wrap(s.name)) 
+        end
         
-        local chosen = filtered[(UI.GetValue("lib_pick_" .. comboId) or 0) + 1]
+        browseSec:Combo("list_" .. q, "Select Script", names, 0)
+        local chosenIdx = UI.GetValue("list_" .. q)
+        local chosen = (chosenIdx and filtered[chosenIdx + 1]) or nil
+
+        -- RIGHT COLUMN (DETECTION)
+        local autoSec = tab:Section("Game Detection (" .. currentId .. ")", "Right")
+        if #detectedMatches > 0 then
+            local dNames = {}
+            for _, s in ipairs(detectedMatches) do table.insert(dNames, wrap(s.name)) end
+            local detKey = "det_" .. currentId .. "_" .. #detectedMatches
+            autoSec:Combo(detKey, "Matched Results", dNames, 0)
+            
+            local dIdx = UI.GetValue(detKey)
+            local dChosen = (dIdx and detectedMatches[dIdx + 1]) or nil
+            
+            if dChosen then
+                autoSec:Button("Execute Matched Script", 210, 36, function()
+                    local fn = loadstring(dChosen.script)
+                    if fn then notify("Match Found", dChosen.name) task.spawn(fn) end
+                end)
+            end
+        else
+            autoSec:Text("No scripts found for this ID.")
+        end
+
+        -- RIGHT COLUMN (EXECUTION ALIGNMENT FIX)
         if chosen then
-            listSec:Button(isFavorite(chosen.name) and "★ Remove Favorite" or "☆ Add Favorite", function() 
-                local found = false
-                for i, v in ipairs(favorites) do if v == chosen.name then table.remove(favorites, i) found = true break end end
-                if not found then table.insert(favorites, chosen.name) end
-                saveFavorites()
-                comboId, favComboId = comboId + 1, favComboId + 1
-                notify("Matcha", found and "Removed Favorite" or "Added Favorite")
+            local controlSec = tab:Section("Execution Panel", "Right")
+            
+            -- Explicitly calling text first to anchor the left alignment
+            controlSec:Text("Script: " .. wrap(chosen.name, 26))
+            controlSec:Text("Author: " .. (chosen.uploader or chosen.author or "Unknown"))
+            
+            -- Space separator for visual clarity
+            controlSec:Text(" ") 
+            
+            controlSec:Button(isFavorite(chosen.name) and "[-] REMOVE FAVORITE" or "[+] SAVE FAVORITE", 160, 32, function() 
+                toggleFavorite(chosen.name) 
+                notify("Update", "Vault modified.")
             end)
-
-            local infoSec = tab:Section("Script Details", "Right", {"Info", "Preview"})
-            if infoSec.page == 0 then
-                infoSec:Text("Name: " .. wrapName(chosen.name))
-                infoSec:Text("Uploader: " .. (chosen.uploader or "Unknown"))
-                infoSec:Text("Category: " .. (chosen.game or "Unknown"))
-            else
-                infoSec:Text(chosen.script:len() > 110 and chosen.script:sub(1, 110) .. "..." or chosen.script)
-            end
-
-            local gEntries = parseGlobals(chosen.script)
-            local cfgPrefix = (chosen.name or ""):gsub("[^%w]", "_")
-            if gEntries then
-                local cfgSec = tab:Section("_G Config", "Left")
-                for _, entry in ipairs(gEntries) do
-                    if entry.kind == "single" then cfgSec:InputText("gv_"..cfgPrefix.."_"..entry.name, "_G."..entry.name, entry.default)
-                    elseif entry.kind == "block" then
-                        cfgSec:Text("_G."..entry.name)
-                        for _, f in ipairs(entry.fields) do cfgSec:InputText("gv_"..cfgPrefix.."_"..entry.name.."_"..f.key, f.key, f.default) end
-                    end
-                end
-            end
-
-            tab:Section("Action", "Right"):Button("Execute Script", 210, 34, function()
-                local final = chosen.script
-                if gEntries then final = buildGlobalsOverride(gEntries, cfgPrefix) .. "\n" .. final end
-                local fn = loadstring(final)
-                if fn then 
-                    task.spawn(fn) 
-                    playExecuteSound() 
-                    buildOverlay(chosen.name)
-                    notify("Matcha", "Executed: " .. chosen.name)
-                end
+            
+            controlSec:Button(">> RUN SEQUENCE", 210, 42, function()
+                local fn = loadstring(chosen.script)
+                if fn then notify("Executing", chosen.name) task.spawn(fn) end
             end)
         end
 
-    elseif navSec.page == 1 then
-        local favScripts = {}
-        for _, s in ipairs(scripts) do if isFavorite(s.name) then table.insert(favScripts, s) end end
+    elseif nav.page == 1 then
+        -- FAVORITES
+        local favs = {}
+        for _, s in ipairs(scripts) do if isFavorite(s.name) then table.insert(favs, s) end end
         
-        local favSec = tab:Section(#favScripts .. " Favorites", "Left")
-        if #favScripts > 0 then
-            local fnms = {}
-            for _, s in ipairs(favScripts) do table.insert(fnms, "★ " .. wrapName(s.name)) end
-            favSec:Combo("fav_p_" .. favComboId, "Select Favorite", fnms, 0)
+        local favSec = tab:Section("Saved Vault", "Left")
+        if #favs > 0 then
+            local fNames = {}
+            for _, s in ipairs(favs) do table.insert(fNames, "★ " .. wrap(s.name)) end
+            favSec:Combo("fav_list", "Select Saved", fNames, 0)
+            local fIdx = UI.GetValue("fav_list")
+            local fChosen = (fIdx and favs[fIdx + 1]) or nil
             
-            local fchosen = favScripts[(UI.GetValue("fav_p_" .. favComboId) or 0) + 1]
-            if fchosen then
-                favSec:Button("Remove Favorite", function() 
-                    for i, v in ipairs(favorites) do if v == fchosen.name then table.remove(favorites, i) break end end
-                    saveFavorites()
-                    favComboId, comboId = favComboId + 1, comboId + 1
-                    notify("Matcha", "Removed Favorite")
-                end)
-
-                local fInfoSec = tab:Section("Favorite Details", "Right", {"Info", "Preview"})
-                if fInfoSec.page == 0 then
-                    fInfoSec:Text("Name: " .. wrapName(fchosen.name))
-                    fInfoSec:Text("Uploader: " .. (fchosen.uploader or "Unknown"))
-                    fInfoSec:Text("Category: " .. (fchosen.game or "Unknown"))
-                else
-                    fInfoSec:Text(fchosen.script:len() > 110 and fchosen.script:sub(1, 110) .. "..." or fchosen.script)
-                end
-
-                local gEntriesF = parseGlobals(fchosen.script)
-                local cfgPrefixF = (fchosen.name or ""):gsub("[^%w]", "_")
-                if gEntriesF then
-                    local cfgSecF = tab:Section("_G Config", "Left")
-                    for _, entry in ipairs(gEntriesF) do
-                        if entry.kind == "single" then cfgSecF:InputText("gv_"..cfgPrefixF.."_"..entry.name, "_G."..entry.name, entry.default)
-                        elseif entry.kind == "block" then
-                            cfgSecF:Text("_G."..entry.name)
-                            for _, f in ipairs(entry.fields) do cfgSecF:InputText("gv_"..cfgPrefixF.."_"..entry.name.."_"..f.key, f.key, f.default) end
-                        end
-                    end
-                end
+            if fChosen then
+                favSec:Button("Delete Entry", 120, 30, function() toggleFavorite(fChosen.name) end)
                 
-                tab:Section("Action", "Right"):Button("Execute Script", 210, 34, function()
-                    local finalF = fchosen.script
-                    if gEntriesF then finalF = buildGlobalsOverride(gEntriesF, cfgPrefixF) .. "\n" .. finalF end
-                    local fn = loadstring(finalF)
-                    if fn then 
-                        task.spawn(fn) 
-                        playExecuteSound() 
-                        buildOverlay(fchosen.name)
-                        notify("Matcha", "Executed Favorite: " .. fchosen.name)
-                    end
+                local fExec = tab:Section("Vault Command", "Right")
+                fExec:Text("Target: " .. wrap(fChosen.name, 25))
+                fExec:Button("Execute Entry", 210, 40, function() 
+                    local fn = loadstring(fChosen.script)
+                    if fn then notify("Vault", fChosen.name) task.spawn(fn) end
                 end)
             end
-        else favSec:Text("No favorites saved.") end
+        else
+            favSec:Text("Vault is currently empty.")
+        end
     end
 end)
 
-loadFavorites()
 notify("Script Library loaded!", "Script Library", 7)
+ 
 warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
