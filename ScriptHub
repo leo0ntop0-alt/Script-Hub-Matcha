@@ -267,3 +267,6 @@ UI.AddTab("Script Library V2", function(tab)
         end
     end
 end)
+
+notify("Script Library V2 tab was added to your Matcha interface", "Script Library V2", 7)
+warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
