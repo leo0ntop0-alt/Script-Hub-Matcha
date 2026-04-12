@@ -1,272 +1,507 @@
-local Http = game:GetService("HttpService")
+-- Do Not Copy it or .....(idk i will cry)
+--
+-- By @shade_s8o
+--
 
-local HUB_URL = (_G.list and _G.list ~= "" and _G.list)
-    or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
+local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
+local RECENTS_FILE = "ScriptLibrary_Recents.json"
 
 local scripts = {}
-local favs = {}
-local loaded = false
-
-local placeId = tostring(game.PlaceId)
+local recents = {}
 local matches = {}
+local ready = false
 local uiRefresh = 0
+local lastPlaceId = ""
 
-local favFile = "Matcha_Favs_V2.json"
+-- Services
+local HttpService = game:GetService("HttpService")
 
---// Favorites
-
-local function saveFavs()
-    local success, data = pcall(function()
-        return Http:JSONEncode(favs)
-    end)
-
-    if success then
-        writefile(favFile, data)
-    end
-end
-
-local function loadFavs()
-    if not isfile(favFile) then
-        favs = {}
-        return
-    end
-
-    local success, data = pcall(function()
-        return Http:JSONDecode(readfile(favFile))
-    end)
-
-    favs = (success and type(data) == "table") and data or {}
-end
-
-local function isFav(name)
-    for _, v in pairs(favs) do
-        if v.name == name then
-            return true
-        end
-    end
-end
-
---// Matching
-
+-- Get IDs from script entry (handles single ID or array of IDs)
 local function getIds(entry)
-    local id = entry.placeId or entry.gameId
-    if not id then return {} end
-
-    return type(id) == "table" and id or {id}
+	local id = entry.placeId or entry.gameId
+	if not id then return {} end
+	return type(id) == "table" and id or {id}
 end
 
+-- Update matches based on current game PlaceId
 local function updateMatches()
-    matches = {}
-    placeId = tostring(game.PlaceId)
-
-    for _, sc in pairs(scripts) do
-        for _, id in pairs(getIds(sc)) do
-            if tostring(id) == placeId then
-                table.insert(matches, sc)
-                break
-            end
-        end
-    end
+	matches = {}
+	local placeId = tostring(game.PlaceId)
+	
+	for _, sc in pairs(scripts) do
+		for _, id in pairs(getIds(sc)) do
+			if tostring(id) == placeId then
+				table.insert(matches, sc)
+				break
+			end
+		end
+	end
 end
 
---// Sync
-
-local function sync()
-    loaded = false
-    loadFavs()
-
-    local ok, res = pcall(game.HttpGet, game, HUB_URL)
-    if not ok or not res or res == "" then
-        loaded = true
-        return
-    end
-
-    -- quick fix for numeric ids breaking JSON
-    res = res:gsub('("placeId"%s*:%s*)(%d+)', '%1"%2"')
-    res = res:gsub('("gameId"%s*:%s*)(%d+)', '%1"%2"')
-
-    local success, data = pcall(function()
-        return Http:JSONDecode(res)
-    end)
-
-    if success and type(data) == "table" then
-        scripts = data
-        updateMatches()
-    end
-
-    loaded = true
-end
-
-task.spawn(sync)
-
---// Utils
-
-local function shortName(name, fav)
-    name = tostring(name or "Unknown")
-
-    if #name > 28 then
-        name = name:sub(1, 25) .. "..."
-    end
-
-    return fav and ("⭐ " .. name) or name
-end
-
-local function run(code)
-    if not code or code == "" then
-        warn("No code??")
-        return
-    end
-
-    local fn = loadstring(code)
-    if not fn then
-        warn("Failed to load script")
-        return
-    end
-
-    task.spawn(fn)
-end
-
---// UI
-
-UI.AddTab("Script Library V2", function(tab)
-
-    if not loaded then
-        tab:Section("Status", "Left"):Text("Loading scripts...")
-        return
-    end
-
-    local nav = tab:Section("", "Left", {"Explorer", "Favorites"})
-
-    if nav.page == 0 then
-        local search = tab:Section("Search", "Left")
-        search:InputText("q", "Search...", "")
-
-        local q = tostring(UI.GetValue("q") or ""):lower()
-
-        local list = {}
-        for _, sc in pairs(scripts) do
-            if q == "" or (sc.name and sc.name:lower():find(q, 1, true)) then
-                table.insert(list, sc)
-            end
-        end
-
-        local names = {}
-        for _, sc in pairs(list) do
-            table.insert(names, shortName(sc.name, isFav(sc.name)))
-        end
-
-        if #names == 0 then
-            names = {"Nothing found"}
-        end
-
-        local key = "list_" .. q .. uiRefresh
-        tab:Section("Scripts (" .. #names .. ")", "Left")
-            :Combo(key, "Pick Script", names, 0)
-
-        local idx = UI.GetValue(key)
-        local picked = (idx and list[idx + 1]) or nil
-
-        -- Game match section
-        local auto = tab:Section("Auto Detect", "Right")
-        auto:Text("Game ID: " .. placeId)
-
-        if #matches > 0 then
-            local matchNames = {}
-
-            for _, m in pairs(matches) do
-                table.insert(matchNames, shortName(m.name, isFav(m.name)))
-            end
-
-            local mKey = "match_" .. placeId .. uiRefresh
-            auto:Combo(mKey, "Matches", matchNames, 0)
-
-            local mIdx = UI.GetValue(mKey)
-            local chosen = (mIdx and matches[mIdx + 1]) or nil
-
-            if chosen then
-                auto:Button("Run Match", 200, 36, function()
-                    run(chosen.script)
-                end)
-            end
-        else
-            auto:Text("No scripts for this game")
-            auto:Button("Refresh", 140, 30, function()
-                task.spawn(sync)
-            end)
-        end
-
-        -- Selected script controls
-        if picked then
-            local sec = tab:Section("Selected", "Right")
-
-            sec:Text("Name: " .. tostring(picked.name))
-            sec:Text("By: " .. tostring(picked.uploader or picked.author or "Unknown"))
-
-            local favIndex
-            for i, v in pairs(favs) do
-                if v.name == picked.name then
-                    favIndex = i
-                    break
-                end
-            end
-
-            sec:Button(favIndex and "Unfavorite" or "Favorite", 150, 34, function()
-                if favIndex then
-                    table.remove(favs, favIndex)
-                else
-                    table.insert(favs, {
-                        name = picked.name,
-                        author = picked.uploader or picked.author,
-                        script = picked.script
-                    })
-                end
-
-                saveFavs()
-                uiRefresh += 1
-            end)
-
-            sec:Button("Run Script             ", 199, 40, function()
-                run(picked.script)
-            end)
-        end
-
-    else
-        local sec = tab:Section("Favorites (" .. #favs .. ")", "Left")
-
-        if #favs == 0 then
-            sec:Text("No favorites yet")
-            return
-        end
-
-        local names = {}
-        for _, f in pairs(favs) do
-            table.insert(names, shortName(f.name, true))
-        end
-
-        local key = "fav_" .. uiRefresh
-        sec:Combo(key, "Select", names, 0)
-
-        local idx = UI.GetValue(key)
-        local f = (idx and favs[idx + 1]) or nil
-
-        if f then
-            local ctrl = tab:Section("Options", "Right")
-
-            ctrl:Text("Name: " .. f.name)
-            ctrl:Text("By: " .. (f.author or "Unknown"))
-
-            ctrl:Button("Remove", 150, 34, function()
-                table.remove(favs, idx + 1)
-                saveFavs()
-                uiRefresh += 1
-            end)
-
-            ctrl:Button("Run Script          ", 190, 40, function()
-                run(f.script)
-            end)
-        end
-    end
+-- Load scripts from hub
+task.spawn(function()
+	local ok, raw = pcall(game.HttpGet, game, HUB_URL)
+	if not ok or not raw then 
+		warn("[ScriptLib] Failed to load hub: " .. tostring(raw))
+		ready = true 
+		return 
+	end
+	
+	-- Fix numeric IDs in JSON (convert to strings)
+	raw = raw:gsub('("placeId"%s*:%s*)(%d+)', '%1"%2"')
+	raw = raw:gsub('("gameId"%s*:%s*)(%d+)', '%1"%2"')
+	
+	local ok2, data = pcall(HttpService.JSONDecode, HttpService, raw)
+	if ok2 and type(data) == "table" then 
+		scripts = data
+		updateMatches()
+		print("[ScriptLib] Loaded " .. #scripts .. " scripts from hub")
+	else
+		warn("[ScriptLib] Failed to parse JSON: " .. tostring(data))
+	end
+	ready = true
 end)
 
-notify("Script Library V2 tab was added to your Matcha interface", "Script Library V2", 7)
+-- Recents Data Persistence
+local function saveRecents()
+	pcall(function()
+		local cleanData = {}
+		for _, recent in ipairs(recents) do
+			table.insert(cleanData, {
+				name = recent.name,
+				script = recent.script,
+				uploader = recent.uploader,
+				game = recent.game
+			})
+		end
+		writefile(RECENTS_FILE, HttpService:JSONEncode(cleanData))
+	end)
+end
+
+local function loadRecents()
+	if not isfile(RECENTS_FILE) then
+		recents = {}
+		return
+	end
+	
+	pcall(function()
+		local data = HttpService:JSONDecode(readfile(RECENTS_FILE))
+		if type(data) == "table" then
+			recents = data
+		end
+	end)
+end
+
+local function addToRecents(scriptData)
+	-- Remove existing entry
+	for i, recent in ipairs(recents) do
+		if recent.name == scriptData.name then
+			table.remove(recents, i)
+			break
+		end
+	end
+	
+	-- Add to top
+	table.insert(recents, 1, {
+		name = scriptData.name,
+		script = scriptData.script,
+		uploader = scriptData.uploader,
+		game = scriptData.game
+	})
+	
+	-- Keep only last 20 items
+	if #recents > 20 then
+		for i = 21, #recents do
+			recents[i] = nil
+		end
+	end
+	
+	saveRecents()
+	uiRefresh = uiRefresh + 1
+end
+
+-- Load recents on startup
+loadRecents()
+
+-- Helper functions
+local function wrapName(text, maxLen)
+	maxLen = maxLen or 28
+	if #text <= maxLen then return text end
+	local result = ""
+	while #text > maxLen do
+		local chunk = text:sub(1, maxLen)
+		local lastSpace = chunk:match(".*()%s") 
+		if lastSpace and lastSpace > maxLen * 0.5 then
+			result = result .. text:sub(1, lastSpace - 1) .. "\n"
+			text = text:sub(lastSpace + 1)
+		else
+			result = result .. chunk .. "\n"
+			text = text:sub(maxLen + 1)
+		end
+	end
+	return result .. text
+end
+
+local function buildGameListFrom(list)
+	local seen, out = {}, {"All Games"}
+	for _, s in ipairs(list) do
+		if s.game and not seen[s.game] then
+			seen[s.game] = true
+			table.insert(out, wrapName(s.game))
+		end
+	end
+	table.sort(out, function(a, b)
+		if a == "All Games" then return true end
+		if b == "All Games" then return false end
+		return a < b
+	end)
+	return out
+end
+
+local function doFilter(search, gameIdx, gameList, sortIdx)
+	local q = (search or ""):lower():match("^%s*(.-)%s*$")
+	local gameFilter = gameList[gameIdx + 1]
+	local out = {}
+	for _, s in ipairs(scripts) do
+		local skip = false
+		if gameFilter ~= "All Games" and wrapName(s.game or "") ~= gameFilter then skip = true end
+		if not skip and q ~= "" then
+			local inName     = s.name     and s.name:lower():find(q, 1, true)
+			local inGame     = s.game     and s.game:lower():find(q, 1, true)
+			local inUploader = s.uploader and s.uploader:lower():find(q, 1, true)
+			if not inName and not inGame and not inUploader then skip = true end
+		end
+		if not skip then table.insert(out, s) end
+	end
+	if sortIdx == 1 then
+		table.sort(out, function(a, b) return (a.name or "") < (b.name or "") end)
+	elseif sortIdx == 2 then
+		table.sort(out, function(a, b) return (a.name or "") > (b.name or "") end)
+	elseif sortIdx == 3 then
+		table.sort(out, function(a, b) return (a.game or "") < (b.game or "") end)
+	end
+	return out
+end
+
+
+-- Parse _G globals from script source
+local function parseGlobals(src)
+	local entries = {}
+	local pos = 1
+	while pos <= #src do
+		local s, e, gname = src:find("_G%.([%w_]+)%s*=", pos)
+		if not s then break end
+		local _, wsEnd = src:find("^%s*", e + 1)
+		local valPos = (wsEnd or e) + 1
+		if src:sub(valPos, valPos) == "{" then
+			local depth, blockEnd = 0, valPos
+			for i = valPos, #src do
+				local c = src:sub(i, i)
+				if c == "{" then
+					depth = depth + 1
+				elseif c == "}" then
+					depth = depth - 1
+					if depth == 0 then blockEnd = i break end
+				end
+			end
+			local body = src:sub(valPos + 1, blockEnd - 1)
+			local fields = {}
+			for line in body:gmatch("[^\n]+") do
+				local noComment = line:match("^(.-)%s*%-%-.*$") or line
+				local k, v = noComment:match("^%s*([%w_]+)%s*=%s*(.-)%s*,?%s*$")
+				if k and v and v ~= "" then
+					table.insert(fields, {key = k, default = v})
+				end
+			end
+			if #fields > 0 then
+				table.insert(entries, {kind = "block", name = gname, fields = fields})
+			end
+			pos = blockEnd + 1
+		else
+			local line = src:match("^([^\n]*)", valPos)
+			if line then
+				local val = line:match("^(.-)%s*%-%-.*$") or line
+				val = val:match("^(.-)%s*;?%s*$") or val
+				val = val:match("^%s*(.-)%s*$") or val
+				if val ~= "" then
+					table.insert(entries, {kind = "single", name = gname, default = val})
+				end
+				pos = valPos + #line + 1
+			else
+				pos = e + 1
+			end
+		end
+	end
+	return #entries > 0 and entries or nil
+end
+
+local function buildGlobalsOverride(entries, prefix)
+	local parts = {}
+	for _, entry in ipairs(entries) do
+		if entry.kind == "single" then
+			local wid = "gv_" .. prefix .. "_" .. entry.name
+			local val = tostring(UI.GetValue(wid) or entry.default):match("^%s*(.-)%s*$")
+			table.insert(parts, "_G." .. entry.name .. " = " .. val)
+		elseif entry.kind == "block" then
+			table.insert(parts, "_G." .. entry.name .. " = {")
+			for _, f in ipairs(entry.fields) do
+				local wid = "gv_" .. prefix .. "_" .. entry.name .. "_" .. f.key
+				local val = tostring(UI.GetValue(wid) or f.default):match("^%s*(.-)%s*$")
+				table.insert(parts, "    " .. f.key .. " = " .. val .. ",")
+			end
+			table.insert(parts, "}")
+		end
+	end
+	return table.concat(parts, "\n")
+end
+
+-- Execute script with recents tracking
+local function executeWithTracking(scriptData, gEntries, cfgPrefix)
+	if not scriptData or not scriptData.script then return end
+	
+	local finalScript = scriptData.script
+	if gEntries then
+		local override = buildGlobalsOverride(gEntries, cfgPrefix)
+		finalScript = override .. "\n" .. finalScript
+	end
+	
+	local fn, loadErr = loadstring(finalScript)
+	if not fn then
+		warn("[ScriptLib] Could not load: " .. tostring(loadErr))
+		return
+	end
+	
+	local ok, runErr = pcall(fn)
+	if not ok then
+		warn("[ScriptLib] Script errored: " .. tostring(runErr))
+	end
+	
+	-- Add to recents after successful execution
+	addToRecents(scriptData)
+end
+
+local prevQ, prevGame, prevSort = "", -1, -1
+local comboId = 0
+
+-- Main UI
+UI.AddTab("Script Library", function(tab)
+	if not ready then
+		local s = tab:Section("Please wait", "Left")
+		s:Text("Loading scripts from the hub...")
+		return
+	end
+
+	local q       = UI.GetValue("lib_q")    or ""
+	local gameIdx = UI.GetValue("lib_game") or 0
+	local sortIdx = UI.GetValue("lib_sort") or 0
+
+	local tempList = doFilter(q, 0, {"All Games"}, 0)
+	local gameList = buildGameListFrom(#q > 0 and tempList or scripts)
+
+	if gameIdx >= #gameList then
+		gameIdx = 0
+		UI.SetValue("lib_game", 0)
+	end
+
+	-- Navigation with Recents tab
+	local mainNav = tab:Section("Library", "Left", {"Explorer", "Recents"})
+
+	if mainNav.page == 0 then
+		-- EXPLORER PAGE
+		-- Show loaded scripts count
+		local statusSec = tab:Section("Status", "Left")
+		if #scripts == 0 then
+			statusSec:Text("⚠ No scripts loaded from hub")
+			statusSec:Text("Check console for errors (F9)")
+		else
+			statusSec:Text("✓ Loaded " .. #scripts .. " scripts from hub")
+		end
+		
+		local filterSec = tab:Section("Filters", "Left", {"Search", "Game & Sort"})
+
+		if filterSec.page == 0 then
+			filterSec:InputText("lib_q", "Name, game, or creator...", "")
+			filterSec:Spacing()
+			filterSec:Text("Matches name, game and uploader fields.")
+		elseif filterSec.page == 1 then
+			filterSec:Combo("lib_game", "Game", gameList, gameIdx)
+			filterSec:Spacing()
+			filterSec:Combo("lib_sort", "Order", {"Default", "Name A-Z", "Name Z-A", "Game A-Z"}, sortIdx)
+			filterSec:Spacing()
+			filterSec:Button("Clear Filters", function()
+				UI.SetValue("lib_q", "")
+				UI.SetValue("lib_game", 0)
+				UI.SetValue("lib_sort", 0)
+			end)
+		end
+
+		local changed = (q ~= prevQ or gameIdx ~= prevGame or sortIdx ~= prevSort)
+		if changed then
+			prevQ, prevGame, prevSort = q, gameIdx, sortIdx
+			UI.SetValue("lib_pick", 0)
+			comboId = comboId + 1
+		end
+
+		local filtered = doFilter(q, gameIdx, gameList, sortIdx)
+		local label = #filtered == 1 and "1 script found" or (#filtered .. " scripts found")
+
+		local names = {}
+		for _, s in ipairs(filtered) do
+			table.insert(names, wrapName(s.name or ""))
+		end
+		if #names == 0 then names = {"No results"} end
+
+		local listSec = tab:Section(label, "Left")
+		local listKey = "lib_pick_" .. q .. "_" .. gameIdx .. "_" .. sortIdx .. "_" .. #filtered
+		listSec:Combo(listKey, "Script", names, 0)
+
+		local idx    = (UI.GetValue(listKey) or 0) + 1
+		local chosen = filtered[idx]
+
+		local cfgPrefix = chosen and (chosen.name or ""):gsub("[^%w]", "_") or ""
+		local gEntries  = chosen and chosen.script and parseGlobals(chosen.script) or nil
+
+		if gEntries then
+			local cfgSec = tab:Section("_G Config", "Left")
+			for _, entry in ipairs(gEntries) do
+				if entry.kind == "single" then
+					local wid = "gv_" .. cfgPrefix .. "_" .. entry.name
+					cfgSec:InputText(wid, "_G." .. entry.name, entry.default)
+				elseif entry.kind == "block" then
+					cfgSec:Text("_G." .. entry.name)
+					cfgSec:Spacing()
+					for _, f in ipairs(entry.fields) do
+						local wid = "gv_" .. cfgPrefix .. "_" .. entry.name .. "_" .. f.key
+						cfgSec:InputText(wid, f.key, f.default)
+					end
+					cfgSec:Spacing()
+				end
+			end
+		end
+
+		local infoSec = tab:Section("Script Details", "Right", {"Info", "Loadstring"})
+
+		if infoSec.page == 0 then
+			if chosen then
+				infoSec:Text("Name")
+				infoSec:Text(wrapName(chosen.name or "—"))
+				infoSec:Spacing()
+				infoSec:Text("Creator")
+				infoSec:Text(chosen.uploader or "Unknown")
+				infoSec:Spacing()
+				infoSec:Text("Game")
+				infoSec:Text(wrapName(chosen.game or "Unknown"))
+			else
+				infoSec:Spacing()
+				infoSec:Text("No script selected.")
+				infoSec:Text("Pick one from the left panel.")
+			end
+		elseif infoSec.page == 1 then
+			if chosen and chosen.script then
+				local preview = chosen.script:len() > 110
+					and chosen.script:sub(1, 110) .. "..."
+					or chosen.script
+				infoSec:Text("Loadstring preview:")
+				infoSec:Spacing()
+				infoSec:Text(preview)
+			else
+				infoSec:Text("Select a script to see the loadstring.")
+			end
+		end
+
+		-- Auto Detect Section
+		local autoSec = tab:Section("Auto Detect", "Right")
+		autoSec:Text("Game ID: " .. tostring(game.PlaceId))
+		
+		-- Auto-refresh if PlaceId changed
+		local currentPlaceId = tostring(game.PlaceId)
+		if lastPlaceId ~= currentPlaceId then
+			lastPlaceId = currentPlaceId
+			updateMatches()
+		end
+		
+		if #matches > 0 then
+			local matchNames = {}
+			for _, m in ipairs(matches) do
+				table.insert(matchNames, wrapName(m.name or ""))
+			end
+			
+			local mKey = "match_" .. currentPlaceId .. "_" .. #matches
+			autoSec:Combo(mKey, "Matches", matchNames, 0)
+			
+			local mIdx = (UI.GetValue(mKey) or 0) + 1
+			local chosenMatch = matches[mIdx]
+			
+			if chosenMatch then
+				autoSec:Spacing()
+				autoSec:Text("Creator: " .. (chosenMatch.uploader or "Unknown"))
+				autoSec:Button("Execute Match", 200, 32, function()
+					local autoGEntries = chosenMatch.script and parseGlobals(chosenMatch.script) or nil
+					local autoCfgPrefix = (chosenMatch.name or ""):gsub("[^%w]", "_")
+					executeWithTracking(chosenMatch, autoGEntries, autoCfgPrefix)
+				end)
+			end
+		else
+			autoSec:Spacing()
+			autoSec:Text("No scripts for this game")
+		end
+
+		local execSec = tab:Section("Execute", "Right")
+
+		if chosen then
+			execSec:Text("Selected:  " .. wrapName(chosen.name or "?"))
+			if gEntries then
+				execSec:Text("_G config detected — edit it on the left.")
+			end
+			execSec:Spacing()
+		else
+			execSec:Text("No script selected.")
+			execSec:Spacing()
+		end
+
+		execSec:Button("Execute Script", 210, 34, function()
+			executeWithTracking(chosen, gEntries, cfgPrefix)
+		end)
+
+	elseif mainNav.page == 1 then
+		-- RECENTS PAGE
+		local recentSec = tab:Section("Recently Executed", "Left")
+		
+		local recentNames = {}
+		for _, recent in ipairs(recents) do
+			table.insert(recentNames, wrapName(recent.name or ""))
+		end
+		
+		if #recentNames == 0 then
+			recentNames = {"No recent scripts"}
+		end
+		
+		local recentKey = "recent_pick_" .. uiRefresh .. "_" .. #recents
+		recentSec:Combo(recentKey, "History", recentNames, 0)
+		
+		local recentIdx = (UI.GetValue(recentKey) or 0) + 1
+		local selectedRecent = recents[recentIdx]
+		
+		if selectedRecent then
+			local recentDetails = tab:Section("Details", "Right")
+			recentDetails:Text("Name")
+			recentDetails:Text(wrapName(selectedRecent.name or "—"))
+			recentDetails:Spacing()
+			recentDetails:Text("Creator")
+			recentDetails:Text(selectedRecent.uploader or "Unknown")
+			recentDetails:Spacing()
+			recentDetails:Text("Game")
+			recentDetails:Text(wrapName(selectedRecent.game or "Unknown"))
+			recentDetails:Spacing()
+			
+			recentDetails:Button("Execute Again", 210, 34, function()
+				local recentGEntries = selectedRecent.script and parseGlobals(selectedRecent.script) or nil
+				local recentCfgPrefix = (selectedRecent.name or ""):gsub("[^%w]", "_")
+				executeWithTracking(selectedRecent, recentGEntries, recentCfgPrefix)
+			end)
+		end
+	end
+end)
+
+notify("Script Library tab was added to your Matcha interface", "Script Library", 7)
 warn("[ScriptLib] RECOMMENDED: Put the Script Library in Matcha auto execute so it stays in your Matcha interface")
