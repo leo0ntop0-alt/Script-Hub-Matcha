@@ -1,8 +1,3 @@
--- Do Not Copy it or .....(idk i will cry)
---
--- By @shade_s8o
---
-
 local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
 local RECENTS_FILE = "ScriptLibrary_Recents.json"
 
@@ -18,46 +13,102 @@ local HttpService = game:GetService("HttpService")
 
 -- Get IDs from script entry (handles single ID or array of IDs)
 local function getIds(entry)
-	local id = entry.placeId or entry.gameId
-	if not id then return {} end
-	return type(id) == "table" and id or {id}
+	local ids = {}
+	
+	-- Add placeId if exists
+	if entry.placeId then
+		if type(entry.placeId) == "table" then
+			for _, v in ipairs(entry.placeId) do
+				table.insert(ids, tostring(v))
+			end
+		else
+			table.insert(ids, tostring(entry.placeId))
+		end
+	end
+	
+	-- Add gameId if exists
+	if entry.gameId then
+		if type(entry.gameId) == "table" then
+			for _, v in ipairs(entry.gameId) do
+				table.insert(ids, tostring(v))
+			end
+		else
+			table.insert(ids, tostring(entry.gameId))
+		end
+	end
+	
+	-- Add universeId if exists
+	if entry.universeId then
+		if type(entry.universeId) == "table" then
+			for _, v in ipairs(entry.universeId) do
+				table.insert(ids, tostring(v))
+			end
+		else
+			table.insert(ids, tostring(entry.universeId))
+		end
+	end
+	
+	return ids
 end
 
--- Update matches based on current game PlaceId
+-- Update matches based on current game UniverseId only
 local function updateMatches()
 	matches = {}
-	local placeId = tostring(game.PlaceId)
+	local universeId = tostring(game.GameId)
+	
+	print("[ScriptLib] Current UniverseId: " .. universeId)
 	
 	for _, sc in pairs(scripts) do
-		for _, id in pairs(getIds(sc)) do
-			if tostring(id) == placeId then
+		local ids = getIds(sc)
+		print("[ScriptLib] Script: " .. (sc.name or "Unknown") .. " has IDs: " .. table.concat(ids, ", "))
+		for _, id in pairs(ids) do
+			local idStr = tostring(id)
+			if idStr == universeId then
+				print("[ScriptLib] Matched script: " .. (sc.name or "Unknown") .. " with ID: " .. idStr)
 				table.insert(matches, sc)
 				break
 			end
 		end
 	end
+	
+	print("[ScriptLib] Total matches: " .. #matches)
 end
 
 -- Load scripts from hub
 task.spawn(function()
+	print("[ScriptLib] Loading scripts from: " .. HUB_URL)
 	local ok, raw = pcall(game.HttpGet, game, HUB_URL)
-	if not ok or not raw then 
+	if not ok or not raw then
 		warn("[ScriptLib] Failed to load hub: " .. tostring(raw))
-		ready = true 
-		return 
+		warn("[ScriptLib] Check if the URL is correct and accessible")
+		ready = true
+		return
 	end
+	print("[ScriptLib] Fetched " .. #raw .. " bytes from hub")
 	
 	-- Fix numeric IDs in JSON (convert to strings)
 	raw = raw:gsub('("placeId"%s*:%s*)(%d+)', '%1"%2"')
 	raw = raw:gsub('("gameId"%s*:%s*)(%d+)', '%1"%2"')
+	raw = raw:gsub('("universeId"%s*:%s*)(%d+)', '%1"%2"')
+	
+	-- Fix missing commas between fields (common JSON error)
+	-- Number followed by newline followed by string
+	raw = raw:gsub('(%d)%s*\n%s*"', '%1,\n  "')
+	-- Number followed by newline followed by number
+	raw = raw:gsub('(%d)%s*\n%s*(%d)', '%1,\n  %2')
+	-- String followed by newline followed by string
+	raw = raw:gsub('"%s*\n%s*"', '",\n  "')
+	-- String followed by newline followed by number
+	raw = raw:gsub('"%s*\n%s*(%d)', '",\n  %1')
 	
 	local ok2, data = pcall(HttpService.JSONDecode, HttpService, raw)
-	if ok2 and type(data) == "table" then 
+	if ok2 and type(data) == "table" then
 		scripts = data
 		updateMatches()
 		print("[ScriptLib] Loaded " .. #scripts .. " scripts from hub")
 	else
 		warn("[ScriptLib] Failed to parse JSON: " .. tostring(data))
+		warn("[ScriptLib] First 100 chars of response: " .. raw:sub(1, 100))
 	end
 	ready = true
 end)
@@ -411,12 +462,12 @@ UI.AddTab("Script Library", function(tab)
 
 		-- Auto Detect Section
 		local autoSec = tab:Section("Auto Detect", "Right")
-		autoSec:Text("Game ID: " .. tostring(game.PlaceId))
+		autoSec:Text("Universe ID: " .. tostring(game.GameId))
 		
-		-- Auto-refresh if PlaceId changed
-		local currentPlaceId = tostring(game.PlaceId)
-		if lastPlaceId ~= currentPlaceId then
-			lastPlaceId = currentPlaceId
+		-- Auto-refresh if UniverseId changed
+		local currentUniverseId = tostring(game.GameId)
+		if lastPlaceId ~= currentUniverseId then
+			lastPlaceId = currentUniverseId
 			updateMatches()
 		end
 		
@@ -426,7 +477,7 @@ UI.AddTab("Script Library", function(tab)
 				table.insert(matchNames, wrapName(m.name or ""))
 			end
 			
-			local mKey = "match_" .. currentPlaceId .. "_" .. #matches
+			local mKey = "match_" .. currentUniverseId .. "_" .. #matches
 			autoSec:Combo(mKey, "Matches", matchNames, 0)
 			
 			local mIdx = (UI.GetValue(mKey) or 0) + 1
@@ -461,6 +512,12 @@ UI.AddTab("Script Library", function(tab)
 
 		execSec:Button("Execute Script", 210, 34, function()
 			executeWithTracking(chosen, gEntries, cfgPrefix)
+		end)
+		
+		execSec:Spacing()
+		execSec:Button("Unload Hub", 210, 30, function()
+			UI.RemoveTab("Script Library")
+			notify("Hub unloaded - tab removed", "Script Library", 3)
 		end)
 
 	elseif mainNav.page == 1 then
