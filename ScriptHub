@@ -1,9 +1,11 @@
 local HUB_URL = type(_G.list) == "string" and _G.list ~= "" and _G.list or "https://raw.githubusercontent.com/leo0ntop0-alt/rolbox/refs/heads/main/myscript.lua"
 local RECENTS_FILE = "ScriptLibrary_Recents.json"
+local EXECUTIONS_FILE = "ScriptLibrary_Executions.json"
 
 local scripts = {}
 local recents = {}
 local matches = {}
+local executions = {}
 local ready = false
 local uiRefresh = 0
 local lastPlaceId = ""
@@ -56,27 +58,20 @@ local function updateMatches()
 	matches = {}
 	local universeId = tostring(game.GameId)
 	
-	print("[ScriptLib] Current UniverseId: " .. universeId)
-	
 	for _, sc in pairs(scripts) do
 		local ids = getIds(sc)
-		print("[ScriptLib] Script: " .. (sc.name or "Unknown") .. " has IDs: " .. table.concat(ids, ", "))
 		for _, id in pairs(ids) do
 			local idStr = tostring(id)
 			if idStr == universeId then
-				print("[ScriptLib] Matched script: " .. (sc.name or "Unknown") .. " with ID: " .. idStr)
 				table.insert(matches, sc)
 				break
 			end
 		end
 	end
-	
-	print("[ScriptLib] Total matches: " .. #matches)
 end
 
 -- Load scripts from hub
 task.spawn(function()
-	print("[ScriptLib] Loading scripts from: " .. HUB_URL)
 	local ok, raw = pcall(game.HttpGet, game, HUB_URL)
 	if not ok or not raw then
 		warn("[ScriptLib] Failed to load hub: " .. tostring(raw))
@@ -84,7 +79,6 @@ task.spawn(function()
 		ready = true
 		return
 	end
-	print("[ScriptLib] Fetched " .. #raw .. " bytes from hub")
 	
 	-- Fix numeric IDs in JSON (convert to strings)
 	raw = raw:gsub('("placeId"%s*:%s*)(%d+)', '%1"%2"')
@@ -105,7 +99,6 @@ task.spawn(function()
 	if ok2 and type(data) == "table" then
 		scripts = data
 		updateMatches()
-		print("[ScriptLib] Loaded " .. #scripts .. " scripts from hub")
 	else
 		warn("[ScriptLib] Failed to parse JSON: " .. tostring(data))
 		warn("[ScriptLib] First 100 chars of response: " .. raw:sub(1, 100))
@@ -174,6 +167,42 @@ end
 -- Load recents on startup
 loadRecents()
 
+-- Execution Tracking (counts only, not users)
+local function loadExecutions()
+	if not isfile(EXECUTIONS_FILE) then
+		executions = {}
+		return
+	end
+	
+	pcall(function()
+		local data = HttpService:JSONDecode(readfile(EXECUTIONS_FILE))
+		if type(data) == "table" then
+			executions = data
+		end
+	end)
+end
+
+local function saveExecutions()
+	pcall(function()
+		writefile(EXECUTIONS_FILE, HttpService:JSONEncode(executions))
+	end)
+end
+
+local function logExecution(scriptName)
+	if not scriptName then return end
+	local key = tostring(scriptName)
+	executions[key] = (executions[key] or 0) + 1
+	saveExecutions()
+end
+
+local function getExecutionCount(scriptName)
+	if not scriptName then return 0 end
+	return executions[tostring(scriptName)] or 0
+end
+
+-- Load executions on startup
+loadExecutions()
+
 -- Helper functions
 local function wrapName(text, maxLen)
 	maxLen = maxLen or 28
@@ -230,6 +259,23 @@ local function doFilter(search, gameIdx, gameList, sortIdx)
 		table.sort(out, function(a, b) return (a.name or "") > (b.name or "") end)
 	elseif sortIdx == 3 then
 		table.sort(out, function(a, b) return (a.game or "") < (b.game or "") end)
+	elseif sortIdx == 4 then
+		-- Filter to only show scripts that have been executed, sorted by usage
+		local filtered = {}
+		for _, s in ipairs(out) do
+			if getExecutionCount(s.name) > 0 then
+				table.insert(filtered, s)
+			end
+		end
+		table.sort(filtered, function(a, b)
+			local countA = getExecutionCount(a.name)
+			local countB = getExecutionCount(b.name)
+			if countA ~= countB then
+				return countA > countB
+			end
+			return (a.name or "") < (b.name or "")
+		end)
+		return filtered
 	end
 	return out
 end
@@ -329,6 +375,9 @@ local function executeWithTracking(scriptData, gEntries, cfgPrefix)
 	
 	-- Add to recents after successful execution
 	addToRecents(scriptData)
+	
+	-- Log execution count
+	logExecution(scriptData.name)
 end
 
 local prevQ, prevGame, prevSort = "", -1, -1
@@ -377,7 +426,7 @@ UI.AddTab("Script Library", function(tab)
 		elseif filterSec.page == 1 then
 			filterSec:Combo("lib_game", "Game", gameList, gameIdx)
 			filterSec:Spacing()
-			filterSec:Combo("lib_sort", "Order", {"Default", "Name A-Z", "Name Z-A", "Game A-Z"}, sortIdx)
+			filterSec:Combo("lib_sort", "Order", {"Default", "Name A-Z", "Name Z-A", "Game A-Z", "Most Used"}, sortIdx)
 			filterSec:Spacing()
 			filterSec:Button("Clear Filters", function()
 				UI.SetValue("lib_q", "")
@@ -404,7 +453,9 @@ UI.AddTab("Script Library", function(tab)
 
 		local listSec = tab:Section(label, "Left")
 		local listKey = "lib_pick_" .. q .. "_" .. gameIdx .. "_" .. sortIdx .. "_" .. #filtered
-		listSec:Combo(listKey, "Script", names, 0)
+		local currentIdx = UI.GetValue(listKey) or 0
+		if currentIdx >= #names then currentIdx = 0 end
+		listSec:Combo(listKey, "Script", names, currentIdx)
 
 		local idx    = (UI.GetValue(listKey) or 0) + 1
 		local chosen = filtered[idx]
@@ -442,6 +493,9 @@ UI.AddTab("Script Library", function(tab)
 				infoSec:Spacing()
 				infoSec:Text("Game")
 				infoSec:Text(wrapName(chosen.game or "Unknown"))
+				infoSec:Spacing()
+				infoSec:Text("Times Executed")
+				infoSec:Text(tostring(getExecutionCount(chosen.name)))
 			else
 				infoSec:Spacing()
 				infoSec:Text("No script selected.")
@@ -512,12 +566,6 @@ UI.AddTab("Script Library", function(tab)
 
 		execSec:Button("Execute Script", 210, 34, function()
 			executeWithTracking(chosen, gEntries, cfgPrefix)
-		end)
-		
-		execSec:Spacing()
-		execSec:Button("Unload Hub", 210, 30, function()
-			UI.RemoveTab("Script Library")
-			notify("Hub unloaded - tab removed", "Script Library", 3)
 		end)
 
 	elseif mainNav.page == 1 then
