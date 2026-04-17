@@ -160,12 +160,12 @@ local function addToRecents(scriptData)
 		end
 	end
 	
-	saveRecents()
+	task.defer(saveRecents)
 	uiRefresh = uiRefresh + 1
 end
 
--- Load recents on startup
-loadRecents()
+-- Load recents on startup (deferred to prevent deadlock)
+task.defer(loadRecents)
 
 -- Execution Tracking (counts only, not users)
 local function loadExecutions()
@@ -192,7 +192,7 @@ local function logExecution(scriptName)
 	if not scriptName then return end
 	local key = tostring(scriptName)
 	executions[key] = (executions[key] or 0) + 1
-	saveExecutions()
+	task.defer(saveExecutions)
 end
 
 local function getExecutionCount(scriptName)
@@ -200,8 +200,8 @@ local function getExecutionCount(scriptName)
 	return executions[tostring(scriptName)] or 0
 end
 
--- Load executions on startup
-loadExecutions()
+-- Load executions on startup (deferred to prevent deadlock)
+task.defer(loadExecutions)
 
 -- Helper functions
 local function wrapName(text, maxLen)
